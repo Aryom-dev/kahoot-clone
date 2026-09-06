@@ -29,8 +29,10 @@ export type DemoQuiz = {
   questions: Question[];
 };
 
+export const DEMO_QUIZ_ID = "00000000-0000-4000-8000-000000000001";
+
 export const DATABASE_DEMO_QUIZ: DemoQuiz = {
-  id: "demo-database-quiz-001",
+  id: DEMO_QUIZ_ID,
   title: "Fundamentos de Bases de Datos (SQL, NoSQL & Modos Interactivos)",
   description: "Quiz técnico de prueba que incluye todas las modalidades de respuesta: opción múltiple, ordenamiento de secuencia (reordenar), textos largos con scroll dinámico y diapositivas de contexto.",
   created_at: new Date().toISOString(),

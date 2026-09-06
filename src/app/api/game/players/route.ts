@@ -24,11 +24,22 @@ export async function GET(request: Request) {
   let supabasePlayers: ServerPlayer[] = [];
   try {
     const supabase = await createClient();
-    if (sessionId && isValidUuid(sessionId)) {
+    let targetSessionId = sessionId;
+
+    if (!targetSessionId && pin) {
+      const { data: sess } = await supabase
+        .from("game_sessions")
+        .select("id")
+        .eq("pin", pin)
+        .single();
+      if (sess?.id) targetSessionId = sess.id as string;
+    }
+
+    if (targetSessionId && isValidUuid(targetSessionId)) {
       const { data } = await supabase
         .from("players")
         .select("*")
-        .eq("session_id", sessionId);
+        .eq("session_id", targetSessionId);
 
       if (data) supabasePlayers = data as ServerPlayer[];
     }

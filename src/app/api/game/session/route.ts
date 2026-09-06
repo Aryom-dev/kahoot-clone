@@ -109,11 +109,15 @@ export async function POST(request: Request) {
       if (sessionId && isValidUuid(sessionId)) {
         await supabase
           .from("game_sessions")
-          .update({
-            status,
-            current_question_index: questionIndex,
-          })
-          .or(`id.eq.${sessionId},pin.eq.${pin}`);
+          .upsert(
+            {
+              id: sessionId,
+              pin: pin || "000000",
+              status,
+              current_question_index: questionIndex,
+            },
+            { onConflict: "id" }
+          );
       }
     } catch (e) {
       console.log("Supabase session POST update error:", e);

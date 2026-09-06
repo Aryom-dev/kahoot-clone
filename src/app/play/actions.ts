@@ -45,21 +45,46 @@ export async function joinGame(formData: FormData): Promise<void> {
 
   const sessionId = (session?.id as string | undefined) ?? formatDemoUuid(pin);
 
-  // 1. Registrar inmediatamente en el store del servidor Node.js (compartido entre laptop y celular)
+  // Garantizar que la sesión exista en Supabase para permitir insertar en 'players'
+  if (!session) {
+    try {
+      await supabase.from("game_sessions").upsert(
+        {
+          id: sessionId,
+          pin,
+          status: "lobby",
+          current_question_index: 0,
+        },
+        { onConflict: "id" }
+      );
+    } catch (e) {
+      console.log("Error garantizando session en joinGame:", e);
+    }
+  }
+
+  // 1. Registrar inmediatamente en el store del servidor Node.js
   const serverPlayer = registerServerPlayer(pin, sessionId, nickname);
 
-  // 2. Intentar registrar en Supabase
-  let playerId = serverPlayer.id;
-  if (isValidUuid(sessionId)) {
+  // 2. Registrar en Supabase con UUID válido
+  let playerId = isValidUuid(serverPlayer.id) ? serverPlayer.id : crypto.randomUUID();
+  try {
     const { data: insertedPlayer } = await supabase
       .from("players")
-      .insert({ session_id: sessionId, nickname, score: 0, streak: 0 })
+      .insert({
+        id: playerId,
+        session_id: sessionId,
+        nickname,
+        score: 0,
+        streak: 0,
+      })
       .select("id")
       .single();
 
     if (insertedPlayer?.id) {
       playerId = insertedPlayer.id as string;
     }
+  } catch (e) {
+    console.log("Error al insertar jugador en Supabase:", e);
   }
 
   const rawAvatarSeed = (formData.get("avatarSeed") as string | null)?.trim() ?? "";

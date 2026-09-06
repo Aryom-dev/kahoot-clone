@@ -143,6 +143,21 @@ export default async function HostLobbyPage({ params }: LobbyPageProps) {
     sessionId = formatDemoUuid(pin);
   }
 
+  // Garantizar que la fila de sesión exista en Supabase
+  try {
+    await supabase.from("game_sessions").upsert(
+      {
+        id: sessionId,
+        pin: finalPin,
+        status: "lobby",
+        current_question_index: 0,
+      },
+      { onConflict: "id" }
+    );
+  } catch (e) {
+    console.log("Error garantizando sesión en Supabase:", e);
+  }
+
   // Registrar sesión en el store global del servidor Node.js
   registerServerSession(finalPin, sessionId, quizId);
 
