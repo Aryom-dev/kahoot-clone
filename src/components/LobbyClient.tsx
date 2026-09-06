@@ -152,7 +152,7 @@ export default function LobbyClient({
   const playUrl =
     typeof window !== "undefined"
       ? isProdHost
-        ? `${window.location.protocol}//${window.location.host}/play?pin=${pin}`
+        ? `${window.location.origin}/play?pin=${pin}`
         : `http://${displayIp}:${displayPort}/play?pin=${pin}`
       : `http://${displayIp}:${displayPort}/play?pin=${pin}`;
 

@@ -51,7 +51,7 @@ export default function ConnectionBanner({
   const playAddress =
     typeof window !== "undefined"
       ? isProdHost
-        ? `${window.location.protocol}//${window.location.host}/play`
+        ? `${window.location.origin}/play`
         : `http://${displayIp}:${displayPort}/play`
       : `http://${displayIp}:${displayPort}/play`;
 

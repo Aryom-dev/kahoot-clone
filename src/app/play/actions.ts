@@ -36,13 +36,16 @@ export async function joinGame(formData: FormData): Promise<void> {
 
   const supabase = await createClient();
 
-  // Buscar sesión por PIN en Supabase
-  const { data: session } = await supabase
+  // Buscar la sesión activa más reciente por PIN en Supabase
+  const { data: sessions } = await supabase
     .from("game_sessions")
-    .select("id, pin, status")
+    .select("id, pin, status, created_at")
     .eq("pin", pin)
-    .single();
+    .neq("status", "ended")
+    .order("created_at", { ascending: false })
+    .limit(1);
 
+  const session = sessions && sessions.length > 0 ? sessions[0] : null;
   const sessionId = (session?.id as string | undefined) ?? formatDemoUuid(pin);
 
   // Garantizar que la sesión exista en Supabase para permitir insertar en 'players'
